@@ -93,7 +93,23 @@ function ProductEditModal({ product, onClose, onSave }: ProductEditModalProps) {
   const [active, setActive] = useState(product?.active ?? true);
   const [variants, setVariants] = useState<ProductVariant[]>(
     product?.variants || [{ id: 'new1', color: 'White', hex: '#FFFFFF', sizes: ['S', 'M', 'L'], active: true }]
+
   );
+  const addVariant = () => {
+  setVariants((prev) => [
+    ...prev,
+    {
+      id: `new-${Date.now()}`,
+      color: 'New Color',
+      hex: '#000000',
+      sizes: [],
+      active: true,
+    },
+  ]);
+  };
+  const removeVariant = (id: string) => {
+  setVariants((prev) => prev.filter((v) => v.id !== id));
+  };
 
   const toggleVariant = (id: string) => {
     setVariants((prev) => prev.map((v) => (v.id === id ? { ...v, active: !v.active } : v)));
@@ -140,10 +156,54 @@ function ProductEditModal({ product, onClose, onSave }: ProductEditModalProps) {
             {variants.map((v) => (
               <div key={v.id} className="border border-navy-100 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full border-2 border-navy-200" style={{ backgroundColor: v.hex }} />
-                    <span className="font-semibold text-navy-700 text-sm">{v.color}</span>
+                  <div className="flex items-center gap-3">
+                    {/* Color picker */}
+                    <input
+                      type="color"
+                      value={v.hex}
+                      onChange={(e) =>
+                        setVariants((prev) =>
+                          prev.map((variant) =>
+                            variant.id === v.id
+                              ? { ...variant, hex: e.target.value }
+                              : variant
+                          )
+                        )
+                      }
+                      className="w-10 h-10 rounded-lg border-2 border-navy-200 cursor-pointer p-1"
+                      title="Choose color"
+                    />
+
+                    {/* Color name */}
+                    <div>
+                      <Input
+                        value={v.color}
+                        onChange={(e) =>
+                          setVariants((prev) =>
+                            prev.map((variant) =>
+                              variant.id === v.id
+                                ? { ...variant, color: e.target.value }
+                                : variant
+                            )
+                          )
+                        }
+                        placeholder="Color name"
+                      />
+
+                      <p className="text-xs text-navy-400 mt-1">
+                        {v.hex}
+                      </p>
+                    </div>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={<Plus className="w-4 h-4" />}
+                    onClick={addVariant}
+                  >
+                    Add Color
+                  </Button>
+
                   <button
                     onClick={() => toggleVariant(v.id)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
@@ -152,6 +212,13 @@ function ProductEditModal({ product, onClose, onSave }: ProductEditModalProps) {
                   >
                     {v.active ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                     {v.active ? 'Active' : 'Inactive'}
+                  </button>
+                  <button
+                    onClick={() => removeVariant(v.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-100 text-red-600 hover:bg-red-200"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Remove
                   </button>
                 </div>
                 <div>

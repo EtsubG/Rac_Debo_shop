@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Lock, User, ArrowRight, Heart } from 'lucide-react';
+import { Shield, Lock, User, ArrowRight } from 'lucide-react';
 import { Button, Input } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 

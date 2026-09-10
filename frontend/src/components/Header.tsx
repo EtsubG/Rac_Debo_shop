@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Menu, X, ShoppingBag, PackageSearch, Shield, Heart } from 'lucide-react';
+import { Menu, X, ShoppingBag, PackageSearch, Shield } from 'lucide-react';
 import type { View } from '@/types';
+import rotaractLogo from '@/assets/logo.png';
 
 interface HeaderProps {
   view: View;
@@ -27,8 +28,12 @@ export function Header({ view, onViewChange }: HeaderProps) {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo + Brand */}
           <button onClick={() => handleNav('shop')} className="flex items-center gap-3 group">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-brand-cranberry to-brand-700 flex items-center justify-center shadow-soft group-hover:shadow-card transition-all">
-              <Heart className="w-5 h-5 lg:w-6 lg:h-6 text-white fill-white" />
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl overflow-hidden shadow-soft group-hover:shadow-card transition-all">
+              <img
+                src={rotaractLogo}
+                alt="Rotaract Club of Debo"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="text-left">
               <h1 className="text-sm lg:text-lg font-extrabold text-navy-800 leading-tight tracking-tight">
