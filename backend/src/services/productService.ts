@@ -1,7 +1,6 @@
-import { supabase } from '../config/supabase.js';
-import { NotFoundError } from '../utils/errors.js';
-import type { Product, ProductCategory, ProductVariant } from '../types/index.js';
-
+import { supabase } from '../config/supabase.ts';
+import { NotFoundError } from '../utils/errors.ts';
+import type { Product, ProductCategory, ProductVariant } from '../types/index.ts';
 interface ProductRow {
   id: string;
   title: string;

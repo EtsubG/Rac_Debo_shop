@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import * as adminController from '../controllers/adminController.js';
-import * as orderController from '../controllers/orderController.js';
-import { validateBody } from '../middleware/validate.js';
-import { requireAuth, requireSuperAdmin } from '../middleware/auth.js';
+import * as adminController from '../controllers/adminController.ts';
+import * as orderController from '../controllers/orderController.ts';
+import { validateBody } from '../middleware/validate.ts';
+import { requireAuth, requireSuperAdmin } from '../middleware/auth.ts';
 
 export const adminRouter = Router();
 

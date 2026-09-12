@@ -1,9 +1,8 @@
-import { supabase } from '../config/supabase.js';
-import { getProductById } from './productService.js';
-import { generateOrderNumber } from '../utils/orderNumber.js';
-import { BadRequestError, NotFoundError } from '../utils/errors.js';
-import type { Order, OrderItem, OrderStatus } from '../types/index.js';
-
+import { supabase } from '../config/supabase.ts';
+import { getProductById } from './productService.ts';
+import { generateOrderNumber } from '../utils/orderNumber.ts';
+import { BadRequestError, NotFoundError } from '../utils/errors.ts';
+import type { Order, OrderItem, OrderStatus } from '../types/index.ts';
 interface OrderRow {
   id: string;
   order_number: string;

@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase.js';
+import { supabase } from '../config/supabase.ts';
 
 /**
  * Generates the next sequential order number in the form DEBO-0001.

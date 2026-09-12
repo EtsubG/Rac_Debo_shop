@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
-import * as productService from '../services/productService.js';
+import * as productService from '../services/productService.ts';
 
 const variantSchema = z.object({
   color: z.string().min(1),

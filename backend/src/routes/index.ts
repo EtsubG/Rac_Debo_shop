@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { productsRouter } from './products.js';
-import { ordersRouter } from './orders.js';
-import { campaignsRouter } from './campaigns.js';
-import { adminRouter } from './admin.js';
+import { productsRouter } from './product.ts';
+import { ordersRouter } from './orders.ts';
+import { campaignsRouter } from './campaign.ts';
+import { adminRouter } from './admin.ts';
 
 export const apiRouter = Router();
 

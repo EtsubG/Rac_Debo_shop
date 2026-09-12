@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
-import { AppError } from '../utils/errors.js';
-import { env } from '../config/env.js';
+import { AppError } from '../utils/errors.ts';
+import { env } from '../config/env.ts';
 
 export function notFoundHandler(_req: Request, res: Response) {
   res.status(404).json({ error: 'Route not found' });

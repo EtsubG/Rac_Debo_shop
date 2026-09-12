@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import * as productController from '../controllers/productController.js';
-import { validateBody } from '../middleware/validate.js';
-import { requireAuth } from '../middleware/auth.js';
+import * as productController from '../controllers/productController.ts';
+import { validateBody } from '../middleware/validate.ts';
+import { requireAuth } from '../middleware/auth.ts';
 
 export const productsRouter = Router();
 

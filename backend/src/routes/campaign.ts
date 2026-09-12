@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import * as campaignController from '../controllers/campaignController.js';
-import { validateBody } from '../middleware/validate.js';
-import { requireAuth } from '../middleware/auth.js';
+import * as campaignController from '../controllers/campaignController.ts';
+import { validateBody } from '../middleware/validate.ts';
+import { requireAuth } from '../middleware/auth.ts';
 
 export const campaignsRouter = Router();
 

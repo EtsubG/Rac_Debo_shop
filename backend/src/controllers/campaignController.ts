@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
-import * as campaignService from '../services/campaignService.js';
+import * as campaignService from '../services/campaignService.ts';
 
 const campaignSchema = z.object({
   name: z.string().min(1),

@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { supabase } from '../config/supabase.js';
-import { env } from '../config/env.js';
-import { UnauthorizedError, NotFoundError, ConflictError, BadRequestError } from '../utils/errors.js';
-import type { AdminUser, JwtPayload } from '../types/index.js';
+import { supabase } from '../config/supabase.ts';
+import { env } from '../config/env.ts';
+import { UnauthorizedError, NotFoundError, ConflictError, BadRequestError } from '../utils/errors.ts';
+import type { AdminUser, JwtPayload } from '../types/index.ts';
 
 interface AdminRow {
   id: string;

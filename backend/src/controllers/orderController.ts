@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
-import * as orderService from '../services/orderService.js';
-import { NotFoundError } from '../utils/errors.js';
-import type { OrderStatus } from '../types/index.js';
+import * as orderService from '../services/orderService.ts';
+import { NotFoundError } from '../utils/errors.ts';
+import type { OrderStatus } from '../types/index.ts';
 
 const createOrderSchema = z.object({
   customerName: z.string().min(1),

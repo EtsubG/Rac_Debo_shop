@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
-import * as adminService from '../services/adminService.js';
+import * as adminService from '../services/adminService.ts';
 
 const loginSchema = z.object({
   username: z.string().min(1),

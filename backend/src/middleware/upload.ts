@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'node:path';
 import fs from 'node:fs';
-import { env } from '../config/env.js';
+import { env } from '../config/env.ts';
 
 const uploadDir = path.resolve(env.uploadDir);
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });

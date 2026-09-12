@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import * as orderController from '../controllers/orderController.js';
-import { validateBody } from '../middleware/validate.js';
-import { requireAuth } from '../middleware/auth.js';
-import { upload } from '../middleware/upload.js';
+import * as orderController from '../controllers/orderController.ts';
+import { validateBody } from '../middleware/validate.ts';
+import { requireAuth } from '../middleware/auth.ts';
+import { upload } from '../middleware/upload.ts';
 
 export const ordersRouter = Router();
 

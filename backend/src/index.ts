@@ -4,9 +4,9 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'node:path';
 import fs from 'node:fs';
-import { env } from './config/env.js';
-import { apiRouter } from './routes/index.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { env } from './config/env.ts';
+import { apiRouter } from './routes/index.ts';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.ts';
 
 const app = express();
 
