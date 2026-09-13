@@ -1,0 +1,13 @@
+{
+  "customerName": "Test User",
+  "phone": "0911111111",
+  "telegram": "@testuser",
+  "items": [
+    {
+      "productId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "color": "Cranberry Red",
+      "size": "M",
+      "quantity": 2
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createOrder } from '@/api';
 import {
   Check,
   Minus,
@@ -39,11 +40,12 @@ export function OrderModal({ product, onClose }: OrderModalProps) {
   const [phone, setPhone] = useState('');
   const [telegram, setTelegram] = useState('');
   const [notes, setNotes] = useState('');
-  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [orderNumber] = useState(`DEBO-${String(43 + Math.floor(Math.random() * 50)).padStart(4, '0')}`);
-
+  const [submitting, setSubmitting] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  
   const activeVariants = product.variants.filter((v) => v.active);
   const variant = activeVariants.find((v) => v.id === selectedVariant);
   const total = product.price * quantity;
@@ -67,20 +69,72 @@ export function OrderModal({ product, onClose }: OrderModalProps) {
   };
 
   const handleFile = (file: File) => {
-    if (!file.type.match(/image\/(jpg|jpeg|png)/)) {
+    if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
       toast.show('Please upload a JPG or PNG image', 'error');
       return;
     }
-    setUploadedFile(file.name);
+    setUploadedFile(file);
     toast.show('Payment proof uploaded successfully', 'success');
   };
 
-  const handleSubmit = () => {
-    setSubmitted(true);
-    toast.show('Order placed successfully!', 'success');
-  };
+const handleSubmit = async () => {
+  if (!variant || !selectedSize || !uploadedFile) {
+    toast.show('Please complete your order first', 'warning');
+    return;
+  }
 
-  const copyToClipboard = (text: string) => {
+  try {
+    setSubmitting(true);
+
+    const formData = new FormData();
+
+    formData.append('customerName', name.trim());
+    formData.append('phone', phone.trim());
+    formData.append('telegram', telegram.trim());
+
+    if (notes.trim()) {
+      formData.append('notes', notes.trim());
+    }
+
+    formData.append(
+      'items',
+      JSON.stringify([
+        {
+          productId: product.id,
+          color: variant.color,
+          size: selectedSize,
+          quantity,
+        },
+      ])
+    );
+
+    formData.append('proof', uploadedFile);
+
+    const response = await createOrder(formData);
+
+    setOrderNumber(response.order.orderNumber);
+
+    setSubmitted(true);
+
+    toast.show('Order placed successfully!', 'success');
+
+    console.log('Created order:', response.order);
+  } catch (error) {
+    console.error('Order creation failed:', error);
+
+    toast.show(
+      error instanceof Error
+        ? error.message
+        : 'Failed to place order',
+      'error'
+    );
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+  const copyToClipboard = (text: string | null) => {
+    if (!text) return;
     navigator.clipboard?.writeText(text);
     toast.show('Copied to clipboard', 'info');
   };
@@ -304,11 +358,20 @@ export function OrderModal({ product, onClose }: OrderModalProps) {
             <div className="flex items-center justify-between bg-brand-50 rounded-xl px-4 py-3">
               <div>
                 <p className="text-xs text-brand-700 font-semibold uppercase tracking-wide">Order Number</p>
-                <p className="text-xl font-extrabold text-brand-cranberry">{orderNumber}</p>
+                <p className="text-xl font-extrabold text-brand-cranberry">
+                  {orderNumber ?? 'Generated after you submit'}
+                </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderNumber)} icon={<Copy className="w-4 h-4" />}>
-                Copy
-              </Button>
+              {orderNumber && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(orderNumber)}
+                  icon={<Copy className="w-4 h-4" />}
+                >
+                  Copy
+                </Button>
+              )}
             </div>
 
             {/* Payment instructions */}
@@ -336,8 +399,8 @@ export function OrderModal({ product, onClose }: OrderModalProps) {
                 <div className="flex items-center gap-3 bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4">
                   <FileImage className="w-8 h-8 text-emerald-500" />
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-emerald-700">{uploadedFile}</p>
-                    <p className="text-xs text-emerald-500">Uploaded successfully</p>
+                    <p className="text-sm font-bold text-emerald-700">{uploadedFile.name}</p>
+                    <p className="text-xs text-emerald-500">Ready to submit with your order</p>
                   </div>
                   <button
                     onClick={() => setUploadedFile(null)}
@@ -385,8 +448,8 @@ export function OrderModal({ product, onClose }: OrderModalProps) {
           Back
         </Button>
         {step === 'Summary' ? (
-          <Button variant="success" onClick={handleSubmit} disabled={!uploadedFile} icon={<CheckCircle2 className="w-5 h-5" />}>
-            Complete Order
+          <Button variant="success" onClick={handleSubmit} disabled={!uploadedFile || submitting} icon={<CheckCircle2 className="w-5 h-5" />}>
+            {submitting ? 'Submitting...' : 'Complete Order'}
           </Button>
         ) : (
           <Button onClick={handleNext} disabled={!canProceed()}>

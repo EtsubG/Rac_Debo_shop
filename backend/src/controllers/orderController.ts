@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
+import { uploadPaymentProof } from '../services/paymentProofService.ts';
 import * as orderService from '../services/orderService.ts';
 import { NotFoundError } from '../utils/errors.ts';
 import type { OrderStatus } from '../types/index.ts';
@@ -40,14 +41,27 @@ const updateStatusSchema = z.object({
 
 export const updateStatusBodySchema = updateStatusSchema;
 
-export async function createOrder(req: Request, res: Response, next: NextFunction) {
+export async function createOrder(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    // Proof file optional — handled by upload middleware, sets req.file
-    const proofUrl = (req as Request & { file?: Express.Multer.File }).file
-      ? `/uploads/${(req as Request & { file: Express.Multer.File }).file.filename}`
-      : undefined;
+    let proofUrl: string | undefined;
 
-    const order = await orderService.createOrder(req.body, proofUrl);
+    const file = (req as Request & {
+      file?: Express.Multer.File;
+    }).file;
+
+    if (file) {
+      proofUrl = await uploadPaymentProof(file);
+    }
+
+    const order = await orderService.createOrder(
+      req.body,
+      proofUrl
+    );
+
     res.status(201).json({ order });
   } catch (err) {
     next(err);

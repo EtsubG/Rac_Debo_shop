@@ -2,14 +2,28 @@ import { Router } from 'express';
 import * as orderController from '../controllers/orderController.ts';
 import { validateBody } from '../middleware/validate.ts';
 import { requireAuth } from '../middleware/auth.ts';
-import { upload } from '../middleware/upload.ts';
+import { paymentProofUpload } from '../middleware/paymentProofUpload.ts';
 
 export const ordersRouter = Router();
 
 // Public: place an order with optional proof upload
 ordersRouter.post(
   '/',
-  upload.single('proof'),
+  paymentProofUpload.single('proof'),
+  (req, _res, next) => {
+    try {
+      if (typeof req.body.items === 'string') {
+        req.body.items = JSON.parse(req.body.items);
+      }
+
+      next();
+    } catch {
+      _res.status(400).json({
+        error: 'items must be valid JSON',
+        code: 'BAD_REQUEST',
+      });
+    }
+  },
   validateBody(orderController.createOrderBodySchema),
   orderController.createOrder
 );
