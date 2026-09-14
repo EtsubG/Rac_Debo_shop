@@ -283,7 +283,7 @@ export async function getProductionReport(): Promise<{
   byProduct: Record<string, number>;
   ordersInProduction: number;
 }> {
-  const included: OrderStatus[] = ['Confirmed', 'Production', 'Ready', 'Delivered'];
+  const included: OrderStatus[] = ['Paid', 'Confirmed', 'Production', 'Ready', 'Delivered'];
 
   const { data: orders, error } = await supabase
     .from('orders')
@@ -342,7 +342,7 @@ export async function getProductionReport(): Promise<{
   for (const r of rows) byProduct[r.product] = (byProduct[r.product] ?? 0) + r.quantity;
 
   const ordersInProduction = orders.filter((o) =>
-    ['Confirmed', 'Production'].includes(o.status)
+    ['Paid', 'Confirmed', 'Production'].includes(o.status)
   ).length;
 
   return { rows, totalUnits, byProduct, ordersInProduction };

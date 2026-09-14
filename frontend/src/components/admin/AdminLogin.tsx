@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Shield, Lock, User, ArrowRight } from 'lucide-react';
+import { Shield, Lock, User, ArrowRight, Heart } from 'lucide-react';
 import { Button, Input } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
+import { adminLogin } from '@/api';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -13,18 +14,27 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       toast.show('Please enter both username and password', 'warning');
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+
+    try {
+      await adminLogin(username.trim(), password);
       onLogin();
       toast.show('Welcome back, Admin!', 'success');
-    }, 800);
+    } catch (error) {
+      toast.show(
+        error instanceof Error ? error.message : 'Unable to sign in',
+        'error'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -80,7 +90,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
         </div>
 
         <p className="text-center text-xs text-navy-400 mt-4">
-          Demo mode — enter any credentials to access the admin portal.
+          Use your admin account credentials to access the portal.
         </p>
       </div>
     </div>

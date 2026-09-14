@@ -35,7 +35,7 @@ export async function uploadProductImage(
   }
 
   const { data } = supabase.storage
-    .from('product-images')
+    .from('product-image')
     .getPublicUrl(filePath);
 
   return data.publicUrl;

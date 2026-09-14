@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Sparkles, Tag, ShoppingBag, Search, CheckCircle2 } from 'lucide-react';
-import type { Product } from '@/types';
-import { products, campaigns } from '@/data/mockData';
+import type { Campaign, Product } from '@/types';
+import { getActiveCampaign, getProducts } from '@/api';
 import { Badge, ProgressBar } from '@/components/ui/Button';
 import { OrderModal } from '@/components/OrderModal';
 
@@ -10,9 +10,43 @@ const categories = ['All', 'T-Shirt', 'Hoodie', 'Tote Bag', 'Cap', 'Mug'];
 export function Shop() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [search, setSearch] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null);
   const [orderProduct, setOrderProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const activeCampaign = campaigns.find((c) => c.active);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadShop() {
+      try {
+        setLoading(true);
+        setError('');
+
+        const [loadedProducts, campaignResponse] = await Promise.all([
+          getProducts(),
+          getActiveCampaign(),
+        ]);
+
+        if (cancelled) return;
+
+        setProducts(loadedProducts.products);
+        setActiveCampaign(campaignResponse?.campaign ?? null);
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : 'Unable to load the shop.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadShop();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filtered = products.filter((p) => {
     const catMatch = activeCategory === 'All' || p.category === activeCategory;
@@ -83,21 +117,46 @@ export function Shop() {
         </div>
       </div>
 
-      {/* Product Grid */}
-      {filtered.length === 0 ? (
+      {/* Loading */}
+      {loading && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-20 h-20 rounded-full bg-navy-50 flex items-center justify-center mb-4">
-            <ShoppingBag className="w-10 h-10 text-navy-300" />
+          <div className="w-10 h-10 rounded-full border-4 border-navy-100 border-t-brand-cranberry animate-spin mb-4" />
+          <p className="text-sm font-medium text-navy-500">Loading products...</p>
+        </div>
+      )}
+
+      {/* Error */}
+      {!loading && error && (
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-red-50 rounded-2xl border border-red-100">
+          <p className="text-lg font-bold text-red-700">Could not load the shop</p>
+          <p className="text-sm text-red-500 mt-1">{error}</p>
+          <p className="text-xs text-red-400 mt-2">
+            Make sure the backend is running and VITE_API_URL points to its /api endpoint.
+          </p>
+        </div>
+      )}
+
+      {/* Product Grid */}
+      {!loading && !error && (
+        filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 rounded-full bg-navy-50 flex items-center justify-center mb-4">
+              <ShoppingBag className="w-10 h-10 text-navy-300" />
+            </div>
+            <h3 className="text-lg font-bold text-navy-700">No products found</h3>
+            <p className="text-sm text-navy-400 mt-1">Try a different search or category.</p>
           </div>
-          <h3 className="text-lg font-bold text-navy-700">No products found</h3>
-          <p className="text-sm text-navy-400 mt-1">Try a different search or category.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
-          {filtered.map((product) => (
-            <ProductCard key={product.id} product={product} onOrder={() => setOrderProduct(product)} />
-          ))}
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+            {filtered.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onOrder={() => setOrderProduct(product)}
+              />
+            ))}
+          </div>
+        )
       )}
 
       {/* Order Modal */}
@@ -147,7 +206,7 @@ function ProductCard({ product, onOrder }: ProductCardProps) {
         <h3 className="font-bold text-navy-800 text-base leading-snug mb-1">{product.title}</h3>
         <p className="text-sm text-navy-400 leading-relaxed mb-3 line-clamp-2">{product.description}</p>
 
-        {/* Color dots */}
+        {/* Real color variants */}
         <div className="flex items-center gap-1.5 mb-3">
           {activeColors.map((v) => (
             <div
@@ -171,10 +230,12 @@ function ProductCard({ product, onOrder }: ProductCardProps) {
               <span className="text-sm font-semibold text-navy-400 ml-1">ETB</span>
             </span>
           </div>
+
           <ProgressBar value={product.currentOrders} max={product.target} label="Pre-orders" />
+
           <button
             onClick={onOrder}
-            disabled={!product.active}
+            disabled={!product.active || availableVariants.length === 0}
             className="mt-4 w-full py-3 rounded-xl font-bold text-sm bg-brand-cranberry text-white hover:bg-brand-600 active:bg-brand-700 transition-all shadow-soft hover:shadow-card disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <ShoppingBag className="w-4 h-4" />
