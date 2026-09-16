@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as orderController from '../controllers/orderController.ts';
 import { validateBody } from '../middleware/validate.ts';
-import { requireAuth } from '../middleware/auth.ts';
+import { requireAuth,requireSuperAdmin } from '../middleware/auth.ts';
 import { paymentProofUpload } from '../middleware/paymentProofUpload.ts';
 
 export const ordersRouter = Router();
@@ -42,3 +42,9 @@ ordersRouter.patch(
 );
 ordersRouter.post('/:id/approve', requireAuth, orderController.approveOrder);
 ordersRouter.post('/:id/reject', requireAuth, orderController.rejectOrder);
+ordersRouter.delete(
+  '/:id',
+  requireAuth,
+  requireSuperAdmin,
+  orderController.deleteOrder
+);

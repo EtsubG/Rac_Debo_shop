@@ -390,3 +390,25 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
   return { totalOrders, totalSales, totalPaid, pendingPayments, recentOrders };
 }
+export async function deleteOrder(id: string): Promise<void> {
+  const { data: existingOrder, error: findError } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (findError) throw findError;
+
+  if (!existingOrder) {
+    throw new NotFoundError('Order not found');
+  }
+
+  const { error } = await supabase.rpc(
+    'delete_order_and_restore_counts',
+    {
+      p_order_id: id,
+    }
+  );
+
+  if (error) throw error;
+}

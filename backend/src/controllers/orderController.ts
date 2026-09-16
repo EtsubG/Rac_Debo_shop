@@ -100,7 +100,7 @@ export async function listOrders(req: Request, res: Response, next: NextFunction
 
 export async function getOrder(req: Request, res: Response, next: NextFunction) {
   try {
-    const order = await orderService.getOrderById(req.params.id);
+    const order = await orderService.getOrderById(String(req.params.id));
     res.json({ order });
   } catch (err) {
     next(err);
@@ -110,7 +110,7 @@ export async function getOrder(req: Request, res: Response, next: NextFunction) 
 export async function updateOrderStatus(req: Request, res: Response, next: NextFunction) {
   try {
     const order = await orderService.updateOrderStatus(
-      req.params.id,
+      String(req.params.id),
       req.body.status,
       req.body.rejectionReason
     );
@@ -122,7 +122,7 @@ export async function updateOrderStatus(req: Request, res: Response, next: NextF
 
 export async function approveOrder(req: Request, res: Response, next: NextFunction) {
   try {
-    const order = await orderService.updateOrderStatus(req.params.id, 'Paid');
+    const order = await orderService.updateOrderStatus(String(req.params.id), 'Paid');
     res.json({ order });
   } catch (err) {
     next(err);
@@ -132,8 +132,21 @@ export async function approveOrder(req: Request, res: Response, next: NextFuncti
 export async function rejectOrder(req: Request, res: Response, next: NextFunction) {
   try {
     const reason = String(req.body.reason || 'Payment rejected');
-    const order = await orderService.updateOrderStatus(req.params.id, 'Awaiting Payment', reason);
+    const order = await orderService.updateOrderStatus(String(req.params.id), 'Awaiting Payment', reason);
     res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+}
+export async function deleteOrder(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    await orderService.deleteOrder(String(req.params.id));
+
+    res.status(204).end();
   } catch (err) {
     next(err);
   }

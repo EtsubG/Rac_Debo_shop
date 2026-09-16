@@ -250,6 +250,14 @@ export async function rejectOrder(
     }
   );
 }
+export async function deleteOrder(id: string): Promise<void> {
+  return apiRequest<void>(
+    `/orders/${encodeURIComponent(id)}`,
+    {
+      method: 'DELETE',
+    }
+  );
+}
 
 /* =========================================================
    ADMIN AUTHENTICATION
