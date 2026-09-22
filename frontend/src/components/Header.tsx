@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, X, ShoppingBag, PackageSearch, Shield } from 'lucide-react';
+import { Menu, X, ShoppingBag, PackageSearch } from 'lucide-react';
 import type { View } from '@/types';
 import rotaractLogo from '@/assets/logo.png';
 
@@ -11,7 +11,7 @@ interface HeaderProps {
 const navItems: { label: string; view: View; icon: typeof ShoppingBag }[] = [
   { label: 'Home / Shop', view: 'shop', icon: ShoppingBag },
   { label: 'Track Order', view: 'track', icon: PackageSearch },
-  { label: 'Admin Portal', view: 'admin', icon: Shield },
+  
 ];
 
 export function Header({ view, onViewChange }: HeaderProps) {

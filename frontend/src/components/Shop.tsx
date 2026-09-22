@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Sparkles, Tag, ShoppingBag, Search, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Tag, ShoppingBag, Search, X } from 'lucide-react';
 import type { Campaign, Product } from '@/types';
 import { getActiveCampaign, getProducts } from '@/api';
 import { Badge, ProgressBar } from '@/components/ui/Button';
@@ -49,8 +49,17 @@ export function Shop() {
   }, []);
 
   const filtered = products.filter((p) => {
-    const catMatch = activeCategory === 'All' || p.category === activeCategory;
-    const searchMatch = p.title.toLowerCase().includes(search.toLowerCase());
+    const normalizedProductCategory = p.category.trim().toLowerCase();
+    const normalizedActiveCategory = activeCategory.trim().toLowerCase();
+
+    const catMatch =
+      activeCategory === 'All' ||
+      normalizedProductCategory === normalizedActiveCategory;
+
+    const searchMatch = p.title
+      .toLowerCase()
+      .includes(search.trim().toLowerCase());
+
     return catMatch && searchMatch;
   });
 
@@ -175,11 +184,21 @@ interface ProductCardProps {
 function ProductCard({ product, onOrder }: ProductCardProps) {
   const availableVariants = product.variants.filter((v) => v.active);
   const activeColors = availableVariants.slice(0, 4);
+  const [showImagePreview, setShowImagePreview] = useState(false);
 
   return (
-    <div className="group bg-white rounded-2xl border border-navy-100 overflow-hidden shadow-soft hover:shadow-card-hover transition-all duration-300 flex flex-col">
-      {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-navy-50">
+    <div
+      className="group bg-white rounded-2xl border border-navy-100 overflow-hidden shadow-soft hover:shadow-card-hover transition-all duration-300 flex flex-col cursor-pointer"
+      onClick={onOrder}
+    >
+      {/* Image Container */}
+      <div
+        className="relative aspect-square overflow-hidden bg-navy-50"
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowImagePreview(true);
+        }}
+      >
         <img
           src={product.image}
           alt={product.title}
@@ -234,7 +253,10 @@ function ProductCard({ product, onOrder }: ProductCardProps) {
           <ProgressBar value={product.currentOrders} max={product.target} label="Pre-orders" />
 
           <button
-            onClick={onOrder}
+            onClick={(event) => {
+              event.stopPropagation();
+              onOrder();
+            }}
             disabled={!product.active || availableVariants.length === 0}
             className="mt-4 w-full py-3 rounded-xl font-bold text-sm bg-brand-cranberry text-white hover:bg-brand-600 active:bg-brand-700 transition-all shadow-soft hover:shadow-card disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
@@ -243,6 +265,40 @@ function ProductCard({ product, onOrder }: ProductCardProps) {
           </button>
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {showImagePreview && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowImagePreview(false);
+          }}
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowImagePreview(false);
+            }}
+            className="absolute top-5 right-5 w-11 h-11 rounded-full bg-white/90 text-navy-800 flex items-center justify-center hover:bg-white transition"
+            aria-label="Close image preview"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          <div
+            className="max-w-5xl max-h-[90vh] flex items-center justify-center"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <img
+              src={product.image}
+              alt={product.title}
+              className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
