@@ -6,9 +6,10 @@ import {
   RefreshCw,
   Package,
 } from 'lucide-react';
-
+import * as XLSX from 'xlsx';
 import { Button } from '@/components/ui/Button';
 import { getProductionReport } from '@/api';
+
 
 interface ProductionRow {
   product: string;
@@ -77,66 +78,96 @@ export function ProductionReport() {
     return text;
   };
 
-  const handleExport = () => {
-    if (!report || report.rows.length === 0) {
-      return;
-    }
+const handleExport = () => {
+  if (!report || report.rows.length === 0) {
+    return;
+  }
 
-    const header = [
-      'Product',
-      'Category',
-      'Color',
-      'Size',
-      'Quantity',
-    ];
+  const workbook = XLSX.utils.book_new();
 
-    const rows = report.rows.map((row) => [
-      escapeCsv(row.product),
-      escapeCsv(row.category),
-      escapeCsv(row.color),
-      escapeCsv(row.size),
-      escapeCsv(row.quantity),
-    ]);
+  /*
+   * Sheet 1: Production Details
+   */
+  const detailRows = [
+    ['ROTARACT CLUB OF DEBO'],
+    ['Production / Manufacturer Report'],
+    [],
+    ['Report Date', new Date().toLocaleDateString()],
+    ['Total Units', report.totalUnits],
+    ['Orders in Production', report.ordersInProduction],
+    [],
+    ['Product', 'Category', 'Color', 'Size', 'Quantity'],
+    ...report.rows.map((row) => [
+      row.product,
+      row.category,
+      row.color,
+      row.size,
+      row.quantity,
+    ]),
+  ];
 
-    const productSummary = Object.entries(report.byProduct).map(
+  const detailSheet =
+    XLSX.utils.aoa_to_sheet(detailRows);
+
+  detailSheet['!cols'] = [
+    { wch: 28 },
+    { wch: 18 },
+    { wch: 20 },
+    { wch: 14 },
+    { wch: 12 },
+  ];
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    detailSheet,
+    'Production Details'
+  );
+
+  /*
+   * Sheet 2: Product Summary
+   */
+  const summaryRows = [
+    ['ROTARACT CLUB OF DEBO'],
+    ['Product Production Summary'],
+    [],
+    ['Product', 'Total Quantity'],
+    ...Object.entries(report.byProduct).map(
       ([product, quantity]) => [
-        escapeCsv(product),
-        '',
-        '',
-        'TOTAL',
-        escapeCsv(quantity),
+        product,
+        quantity,
       ]
-    );
+    ),
+    [],
+    ['TOTAL UNITS', report.totalUnits],
+    ['ORDERS IN PRODUCTION', report.ordersInProduction],
+  ];
 
-    const csv = [
-      header.join(','),
-      ...rows.map((row) => row.join(',')),
-      '',
-      'Product Summary',
-      ...productSummary.map((row) => row.join(',')),
-      '',
-      `Total Units,${report.totalUnits}`,
-      `Orders in Production,${report.ordersInProduction}`,
-    ].join('\n');
+  const summarySheet =
+    XLSX.utils.aoa_to_sheet(summaryRows);
 
-    const blob = new Blob([csv], {
-      type: 'text/csv;charset=utf-8;',
-    });
+  summarySheet['!cols'] = [
+    { wch: 35 },
+    { wch: 20 },
+  ];
 
-    const url = URL.createObjectURL(blob);
+  XLSX.utils.book_append_sheet(
+    workbook,
+    summarySheet,
+    'Product Summary'
+  );
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `production-report-${new Date()
-      .toISOString()
-      .slice(0, 10)}.csv`;
+  /*
+   * Create Excel file
+   */
+  const date = new Date()
+    .toISOString()
+    .slice(0, 10);
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-  };
+  XLSX.writeFile(
+    workbook,
+    `rotaract-production-report-${date}.xlsx`
+  );
+};
 
   if (loading) {
     return (
@@ -233,7 +264,7 @@ export function ProductionReport() {
             disabled={report.rows.length === 0}
             icon={<Download className="w-4 h-4" />}
           >
-            Export CSV
+            Export Excel
           </Button>
         </div>
       </div>

@@ -16,6 +16,8 @@ import {
   PackageCheck,
   Truck,
   ShieldCheck,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 
 import type { Order, OrderStatus } from '@/types';
@@ -35,6 +37,8 @@ import {
   approveOrder,
   rejectOrder,
   updateOrderStatus,
+  deleteOrder,
+  getCurrentAdmin,
 } from '@/api';
 
 const statusFilters: (OrderStatus | 'All')[] = [
@@ -84,6 +88,11 @@ export function OrdersManagement(
   _props: OrdersManagementProps
 ) {
   const toast = useToast();
+  const [currentAdmin, setCurrentAdmin] =
+  useState<{ role: 'super' | 'admin' } | null>(null);
+
+const [deletingOrderId, setDeletingOrderId] =
+  useState<string | null>(null);
 
   const [orders, setOrders] =
     useState<Order[]>([]);
@@ -152,9 +161,20 @@ export function OrdersManagement(
     }
   };
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
+useEffect(() => {
+  loadOrders();
+
+  getCurrentAdmin()
+    .then((response) => {
+      setCurrentAdmin(response.admin);
+    })
+    .catch((error) => {
+      console.error(
+        'Failed to load current admin:',
+        error
+      );
+    });
+}, []);
 
   const filtered = useMemo(() => {
     const searchValue =
@@ -296,6 +316,55 @@ export function OrdersManagement(
       setProcessing(false);
     }
   };
+  const handleDeleteOrder = async (
+  order: Order
+) => {
+  if (currentAdmin?.role !== 'super') {
+    toast.show(
+      'Only the Super Admin can delete orders.',
+      'error'
+    );
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Are you sure you want to permanently delete order ${order.orderNumber}?\n\nThis action cannot be undone.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    setDeletingOrderId(order.id);
+
+    await deleteOrder(order.id);
+
+    setOrders((current) =>
+      current.filter(
+        (item) => item.id !== order.id
+      )
+    );
+
+    if (selectedOrder?.id === order.id) {
+      closeDrawer();
+    }
+
+    toast.show(
+      `Order ${order.orderNumber} deleted successfully.`,
+      'success'
+    );
+  } catch (error) {
+    toast.show(
+      error instanceof Error
+        ? error.message
+        : 'Failed to delete order.',
+      'error'
+    );
+  } finally {
+    setDeletingOrderId(null);
+  }
+};
 
   /*
    * Get the next action available
@@ -575,20 +644,42 @@ export function OrdersManagement(
                   </td>
 
                   <td className="px-5 py-4 text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setSelectedOrder(
-                          order
-                        )
-                      }
-                      icon={
-                        <Eye className="w-4 h-4" />
-                      }
-                    >
-                      View
-                    </Button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setSelectedOrder(order)
+                        }
+                        icon={
+                          <Eye className="w-4 h-4" />
+                        }
+                      >
+                        View
+                      </Button>
+
+                      {currentAdmin?.role === 'super' && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeleteOrder(order)
+                          }
+                          disabled={
+                            deletingOrderId === order.id
+                          }
+                          className="w-9 h-9 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition disabled:opacity-50"
+                          title="Delete order"
+                        >
+                          <Trash2
+                            className={`w-4 h-4 ${
+                              deletingOrderId === order.id
+                                ? 'animate-pulse'
+                                : ''
+                            }`}
+                          />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               )
@@ -637,13 +728,12 @@ export function OrdersManagement(
                   </p>
                 </div>
 
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    setSelectedOrder(
-                      order
-                    )
+                    setSelectedOrder(order)
                   }
                   icon={
                     <Eye className="w-4 h-4" />
@@ -651,6 +741,23 @@ export function OrdersManagement(
                 >
                   View
                 </Button>
+
+                {currentAdmin?.role === 'super' && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleDeleteOrder(order)
+                    }
+                    disabled={
+                      deletingOrderId === order.id
+                    }
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition disabled:opacity-50"
+                    title="Delete order"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
               </div>
             </div>
           )
