@@ -35,7 +35,7 @@ export async function listProducts(req: Request, res: Response, next: NextFuncti
 
 export async function getProduct(req: Request, res: Response, next: NextFunction) {
   try {
-    const product = await productService.getProductById(req.params.id);
+    const product = await productService.getProductById(String(req.params.id));
     res.json({ product });
   } catch (err) {
     next(err);
@@ -53,7 +53,7 @@ export async function createProduct(req: Request, res: Response, next: NextFunct
 
 export async function updateProduct(req: Request, res: Response, next: NextFunction) {
   try {
-    const product = await productService.updateProduct(req.params.id, req.body);
+    const product = await productService.updateProduct(String(req.params.id), req.body);
     res.json({ product });
   } catch (err) {
     next(err);
@@ -62,7 +62,7 @@ export async function updateProduct(req: Request, res: Response, next: NextFunct
 
 export async function deleteProduct(req: Request, res: Response, next: NextFunction) {
   try {
-    await productService.deleteProduct(req.params.id);
+    await productService.deleteProduct(String(req.params.id));
     res.status(204).end();
   } catch (err) {
     next(err);

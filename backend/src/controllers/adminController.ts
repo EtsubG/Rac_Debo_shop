@@ -64,7 +64,7 @@ export async function createAdmin(req: Request, res: Response, next: NextFunctio
 export async function deleteAdmin(req: Request, res: Response, next: NextFunction) {
   try {
     const requesterId = req.admin!.sub;
-    await adminService.deleteAdmin(req.params.id, requesterId);
+    await adminService.deleteAdmin(String(req.params.id), requesterId);
     res.status(204).end();
   } catch (err) {
     next(err);

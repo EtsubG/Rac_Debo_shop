@@ -40,7 +40,7 @@ export async function createCampaign(req: Request, res: Response, next: NextFunc
 
 export async function activateCampaign(req: Request, res: Response, next: NextFunction) {
   try {
-    const campaign = await campaignService.setActiveCampaign(req.params.id);
+    const campaign = await campaignService.setActiveCampaign(String(req.params.id));
     res.json({ campaign });
   } catch (err) {
     next(err);
@@ -49,7 +49,7 @@ export async function activateCampaign(req: Request, res: Response, next: NextFu
 
 export async function archiveCampaign(req: Request, res: Response, next: NextFunction) {
   try {
-    await campaignService.archiveCampaign(req.params.id);
+    await campaignService.archiveCampaign(String(req.params.id));
     res.status(204).end();
   } catch (err) {
     next(err);
