@@ -88,11 +88,15 @@ export function OrdersManagement(
   _props: OrdersManagementProps
 ) {
   const toast = useToast();
-  const [currentAdmin, setCurrentAdmin] =
-  useState<{ role: 'super' | 'admin' } | null>(null);
 
-const [deletingOrderId, setDeletingOrderId] =
-  useState<string | null>(null);
+  const [currentAdmin, setCurrentAdmin] =
+    useState<{ role: 'super' | 'admin' } | null>(null);
+
+  const [deleteOrderTarget, setDeleteOrderTarget] =
+    useState<Order | null>(null);
+
+  const [deletingOrderId, setDeletingOrderId] =
+    useState<string | null>(null);
 
   const [orders, setOrders] =
     useState<Order[]>([]);
@@ -161,20 +165,20 @@ const [deletingOrderId, setDeletingOrderId] =
     }
   };
 
-useEffect(() => {
-  loadOrders();
+  useEffect(() => {
+    loadOrders();
 
-  getCurrentAdmin()
-    .then((response) => {
-      setCurrentAdmin(response.admin);
-    })
-    .catch((error) => {
-      console.error(
-        'Failed to load current admin:',
-        error
-      );
-    });
-}, []);
+    getCurrentAdmin()
+      .then((response) => {
+        setCurrentAdmin(response.admin);
+      })
+      .catch((error) => {
+        console.error(
+          'Failed to load current admin:',
+          error
+        );
+      });
+  }, []);
 
   const filtered = useMemo(() => {
     const searchValue =
@@ -316,55 +320,50 @@ useEffect(() => {
       setProcessing(false);
     }
   };
-  const handleDeleteOrder = async (
-  order: Order
-) => {
-  if (currentAdmin?.role !== 'super') {
-    toast.show(
-      'Only the Super Admin can delete orders.',
-      'error'
-    );
-    return;
-  }
 
-  const confirmed = window.confirm(
-    `Are you sure you want to permanently delete order ${order.orderNumber}?\n\nThis action cannot be undone.`
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-    setDeletingOrderId(order.id);
-
-    await deleteOrder(order.id);
-
-    setOrders((current) =>
-      current.filter(
-        (item) => item.id !== order.id
-      )
-    );
-
-    if (selectedOrder?.id === order.id) {
-      closeDrawer();
+  const handleDeleteOrder = (order: Order) => {
+    if (currentAdmin?.role !== 'super') {
+      return;
     }
 
-    toast.show(
-      `Order ${order.orderNumber} deleted successfully.`,
-      'success'
-    );
-  } catch (error) {
-    toast.show(
-      error instanceof Error
-        ? error.message
-        : 'Failed to delete order.',
-      'error'
-    );
-  } finally {
-    setDeletingOrderId(null);
-  }
-};
+    setDeleteOrderTarget(order);
+  };
+
+  const confirmDeleteOrder = async () => {
+    if (!deleteOrderTarget) return;
+
+    const order = deleteOrderTarget;
+
+    try {
+      setDeletingOrderId(order.id);
+
+      await deleteOrder(order.id);
+
+      setOrders((current) =>
+        current.filter((item) => item.id !== order.id)
+      );
+
+      if (selectedOrder?.id === order.id) {
+        closeDrawer();
+      }
+
+      setDeleteOrderTarget(null);
+
+      toast.show(
+        `Order ${order.orderNumber} deleted successfully.`,
+        'success'
+      );
+    } catch (error) {
+      toast.show(
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete order.',
+        'error'
+      );
+    } finally {
+      setDeletingOrderId(null);
+    }
+  };
 
   /*
    * Get the next action available
@@ -470,13 +469,13 @@ useEffect(() => {
     <div className="space-y-4">
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-base font-bold text-navy-800">
             Orders
           </h2>
 
-          <p className="text-xs text-navy-400 mt-1">
+          <p className="text-xs text-navy-400 mt-1 max-w-xs">
             Manage orders, verify payments,
             and move orders through production.
           </p>
@@ -518,7 +517,7 @@ useEffect(() => {
           className="w-full px-4 py-3 rounded-xl border-2 border-navy-200 focus:border-brand-cranberry outline-none text-navy-800 placeholder:text-navy-300 text-sm transition"
         />
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5 -mx-4 px-4 sm:mx-0 sm:px-0">
           {statusFilters.map(
             (status) => (
               <button
@@ -527,7 +526,7 @@ useEffect(() => {
                   setFilter(status);
                   setPage(1);
                 }}
-                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs whitespace-nowrap transition-all ${
+                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs whitespace-nowrap transition-all shrink-0 ${
                   filter === status
                     ? 'bg-navy-800 text-white shadow-soft'
                     : 'bg-white border-2 border-navy-200 text-navy-500 hover:border-navy-300'
@@ -728,36 +727,36 @@ useEffect(() => {
                   </p>
                 </div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setSelectedOrder(order)
-                  }
-                  icon={
-                    <Eye className="w-4 h-4" />
-                  }
-                >
-                  View
-                </Button>
-
-                {currentAdmin?.role === 'super' && (
-                  <button
-                    type="button"
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() =>
-                      handleDeleteOrder(order)
+                      setSelectedOrder(order)
                     }
-                    disabled={
-                      deletingOrderId === order.id
+                    icon={
+                      <Eye className="w-4 h-4" />
                     }
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition disabled:opacity-50"
-                    title="Delete order"
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+                    View
+                  </Button>
+
+                  {currentAdmin?.role === 'super' && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleDeleteOrder(order)
+                      }
+                      disabled={
+                        deletingOrderId === order.id
+                      }
+                      className="w-9 h-9 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition disabled:opacity-50"
+                      title="Delete order"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )
@@ -992,10 +991,7 @@ useEffect(() => {
                     {selectedOrder.items.map(
                       (item, index) => (
                         <div
-                          key={
-                            item.id ||
-                            index
-                          }
+                          key={index}
                           className="flex items-center justify-between py-2.5 px-4 bg-white border border-navy-100 rounded-xl"
                         >
                           <div>
@@ -1310,6 +1306,74 @@ useEffect(() => {
             )}
           </div>
         </Drawer>
+      )}
+
+      {/* Delete order confirmation modal */}
+      {deleteOrderTarget && (
+        <Modal
+          open={true}
+          onClose={() => {
+            if (!deletingOrderId) {
+              setDeleteOrderTarget(null);
+            }
+          }}
+          title="Delete Order"
+          size="md"
+        >
+          <div className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-navy-800">
+                  Permanently delete this order?
+                </h3>
+
+                <p className="text-sm text-navy-500 mt-1 leading-relaxed">
+                  You are about to permanently delete order{' '}
+                  <span className="font-bold text-navy-800">
+                    {deleteOrderTarget.orderNumber}
+                  </span>
+                  .
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 bg-red-50 border border-red-100 rounded-xl p-4">
+              <p className="text-sm font-semibold text-red-700">
+                This action cannot be undone.
+              </p>
+
+              <p className="text-xs text-red-600 mt-1">
+                The order and its associated order items will be
+                permanently removed from the system.
+              </p>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="outline"
+                fullWidth
+                disabled={Boolean(deletingOrderId)}
+                onClick={() => setDeleteOrderTarget(null)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                variant="danger"
+                fullWidth
+                loading={Boolean(deletingOrderId)}
+                icon={<Trash2 className="w-4 h-4" />}
+                onClick={confirmDeleteOrder}
+              >
+                Delete Order
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

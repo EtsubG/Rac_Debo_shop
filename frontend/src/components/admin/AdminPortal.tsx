@@ -216,12 +216,7 @@ export function AdminPortal({ onLogout }: AdminPortalProps) {
         );
 
       case 'production':
-        return (
-          <ProductionReport
-            orders={orders}
-            products={products}
-          />
-        );
+        return <ProductionReport />;
 
       case 'settings':
         return <AdminSettings />;
@@ -232,9 +227,9 @@ export function AdminPortal({ onLogout }: AdminPortalProps) {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-5rem)]">
+    <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-white border-r border-navy-100 flex-col fixed left-0 top-20 bottom-0 z-30">
+      <aside className="hidden lg:flex w-64 bg-white border-r border-navy-100 flex-col fixed left-0 top-0 bottom-0 z-30">
         <SidebarContent
           activeTab={activeTab}
           onTabChange={handleTabChange}
@@ -250,7 +245,7 @@ export function AdminPortal({ onLogout }: AdminPortalProps) {
             onClick={() => setSidebarOpen(false)}
           />
 
-          <div className="relative w-64 bg-white shadow-float h-full flex flex-col animate-slide-in-right">
+          <div className="relative ml-auto w-64 bg-white shadow-float h-full flex flex-col animate-slide-in-right">
             <button
               onClick={() => setSidebarOpen(false)}
               className="absolute top-3 right-3 p-2 rounded-lg hover:bg-navy-50 text-navy-400"
@@ -270,7 +265,7 @@ export function AdminPortal({ onLogout }: AdminPortalProps) {
       {/* Main Content */}
       <div className="flex-1 lg:ml-64 min-w-0">
         {/* Mobile top bar */}
-        <div className="lg:hidden sticky top-16 z-20 bg-white border-b border-navy-100 px-4 py-3 flex items-center justify-between">
+        <div className="lg:hidden sticky top-0 z-20 bg-white border-b border-navy-100 px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2.5 rounded-xl hover:bg-navy-50 transition text-navy-700 min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -287,33 +282,6 @@ export function AdminPortal({ onLogout }: AdminPortalProps) {
 
         {/* Content */}
         <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
-          {/* Page Header */}
-          <div className="mb-6 hidden lg:block">
-            <h1 className="text-2xl font-extrabold text-navy-800">
-              {currentNav?.label}
-            </h1>
-
-            <p className="text-sm text-navy-400 mt-0.5">
-              {activeTab === 'dashboard' &&
-                'Overview of your store performance and key metrics.'}
-
-              {activeTab === 'orders' &&
-                'Manage and track all customer orders.'}
-
-              {activeTab === 'products' &&
-                'Add, edit, and manage your merchandise products.'}
-
-              {activeTab === 'campaigns' &&
-                'Start, archive, and switch between campaigns.'}
-
-              {activeTab === 'production' &&
-                'Print-ready breakdown for your manufacturer.'}
-
-              {activeTab === 'settings' &&
-                'Manage admin accounts and security settings.'}
-            </p>
-          </div>
-
           {renderContent()}
         </div>
       </div>

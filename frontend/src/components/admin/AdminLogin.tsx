@@ -23,11 +23,19 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
 
     setLoading(true);
 
-    try {
-      await adminLogin(username.trim(), password);
-      onLogin();
-      toast.show('Welcome back, Admin!', 'success');
-    } catch (error) {
+   try {
+  const response = await adminLogin(
+    username.trim(),
+    password
+  );
+
+  onLogin();
+
+  toast.show(
+    `Welcome back, ${response.admin.username}!`,
+    'success'
+  );
+} catch (error) {
       toast.show(
         error instanceof Error ? error.message : 'Unable to sign in',
         'error'

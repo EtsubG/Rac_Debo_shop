@@ -86,7 +86,7 @@ export function Drawer({ open, onClose, children, title, side = 'right', width =
       <div className="absolute inset-0 bg-navy-900/40 backdrop-blur-sm" onClick={onClose} />
       <div
         className={`relative ${width} w-full bg-white shadow-float h-full flex flex-col animate-slide-in-right`}
-        style={{ marginLeft: side === 'left' ? 'auto' : undefined, marginRight: side === 'right' ? 'auto' : undefined }}
+        style={{ marginLeft: side === 'right' ? 'auto' : undefined, marginRight: side === 'left' ? 'auto' : undefined }}
       >
         {title && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-navy-100 shrink-0">

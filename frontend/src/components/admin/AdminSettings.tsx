@@ -93,34 +93,36 @@ export function AdminSettings({ onLogout }: AdminSettingsProps) {
     loadAdminData();
   }, []);
 
-  async function loadAdminData() {
-    try {
-      setLoadingAdmins(true);
+ async function loadAdminData() {
+  try {
+    setLoadingAdmins(true);
 
-      const [currentResponse, usersResponse] =
-        await Promise.all([
-          getCurrentAdmin(),
-          getAdminUsers(),
-        ]);
+    const currentResponse = await getCurrentAdmin();
 
-      setCurrentAdmin(currentResponse.admin);
+    setCurrentAdmin(currentResponse.admin);
+
+    if (currentResponse.admin.role === 'super') {
+      const usersResponse = await getAdminUsers();
       setAdmins(usersResponse.admins);
-    } catch (error) {
-      console.error(
-        'Failed to load admin settings:',
-        error
-      );
-
-      toast.show(
-        error instanceof Error
-          ? error.message
-          : 'Failed to load admin information',
-        'error'
-      );
-    } finally {
-      setLoadingAdmins(false);
+    } else {
+      setAdmins([]);
     }
+  } catch (error) {
+    console.error(
+      'Failed to load admin settings:',
+      error
+    );
+
+    toast.show(
+      error instanceof Error
+        ? error.message
+        : 'Failed to load admin information',
+      'error'
+    );
+  } finally {
+    setLoadingAdmins(false);
   }
+}
 
   const handleChangePassword = async (
     e: React.FormEvent
