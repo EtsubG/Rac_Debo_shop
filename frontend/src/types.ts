@@ -7,7 +7,6 @@ export type AdminTab =
   | 'campaigns'
   | 'production'
   | 'settings';
-
 export type OrderStatus =
   | 'Awaiting Payment'
   | 'Proof Uploaded'
