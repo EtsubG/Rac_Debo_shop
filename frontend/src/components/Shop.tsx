@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles, Tag, ShoppingBag, Search, X } from 'lucide-react';
 import type { Campaign, Product } from '@/types';
 import { getActiveCampaign, getProducts } from '@/api';
-import { Badge, ProgressBar } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Button';
 import { OrderModal } from '@/components/OrderModal';
 
 const categories = ['All', 'T-Shirt', 'Hoodie', 'Tote Bag', 'Cap', 'Mug'];
@@ -249,8 +249,6 @@ function ProductCard({ product, onOrder }: ProductCardProps) {
               <span className="text-sm font-semibold text-navy-400 ml-1">ETB</span>
             </span>
           </div>
-
-          <ProgressBar value={product.currentOrders} max={product.target} label="Pre-orders" />
 
           <button
             onClick={(event) => {
