@@ -84,31 +84,3 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     next(err);
   }
 }
-
-/* =========================================================
-   PAYMENT INFO
-   ========================================================= */
-
-export const updatePaymentInfoBodySchema = z.object({
-  telebirrNumber: z.string().max(30),
-  cbeAccount:     z.string().max(30),
-  accountName:    z.string().max(80).default('Rotaract Club of Debo'),
-});
-
-export async function getPaymentInfo(_req: Request, res: Response, next: NextFunction) {
-  try {
-    const info = await adminService.getPaymentInfo();
-    res.json({ paymentInfo: info });
-  } catch (err) {
-    next(err);
-  }
-}
-
-export async function updatePaymentInfo(req: Request, res: Response, next: NextFunction) {
-  try {
-    const info = await adminService.updatePaymentInfo(req.body);
-    res.json({ paymentInfo: info });
-  } catch (err) {
-    next(err);
-  }
-}

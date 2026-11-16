@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { supabase } from '../config/supabase.ts';
 import { env } from '../config/env.ts';
 import { UnauthorizedError, NotFoundError, ConflictError, BadRequestError } from '../utils/errors.ts';
-import type { AdminUser, JwtPayload, PaymentInfo } from '../types/index.ts';
+import type { AdminUser, JwtPayload } from '../types/index.ts';
 
 interface AdminRow {
   id: string;
@@ -153,49 +153,4 @@ export async function changePassword(
     .eq('id', adminId);
 
   if (upErr) throw upErr;
-}
-
-/* =========================================================
-   PAYMENT INFO
-   ========================================================= */
-
-const PAYMENT_INFO_KEY = 'payment_info';
-
-export async function getPaymentInfo(): Promise<PaymentInfo> {
-  const { data, error } = await supabase
-    .from('app_settings')
-    .select('value')
-    .eq('key', PAYMENT_INFO_KEY)
-    .maybeSingle();
-
-  if (error) throw error;
-
-  if (!data) {
-    // Row not yet seeded — return safe defaults.
-    return { telebirrNumber: '', cbeAccount: '', accountName: 'Rotaract Club of Debo' };
-  }
-
-  const v = data.value as Record<string, string>;
-
-  return {
-    telebirrNumber: v.telebirrNumber ?? '',
-    cbeAccount:     v.cbeAccount     ?? '',
-    accountName:    v.accountName    ?? 'Rotaract Club of Debo',
-  };
-}
-
-export async function updatePaymentInfo(input: PaymentInfo): Promise<PaymentInfo> {
-  const value = {
-    telebirrNumber: input.telebirrNumber.trim(),
-    cbeAccount:     input.cbeAccount.trim(),
-    accountName:    input.accountName.trim() || 'Rotaract Club of Debo',
-  };
-
-  const { error } = await supabase
-    .from('app_settings')
-    .upsert({ key: PAYMENT_INFO_KEY, value }, { onConflict: 'key' });
-
-  if (error) throw error;
-
-  return value;
 }

@@ -34,13 +34,3 @@ adminRouter.delete('/users/:id', requireAuth, requireSuperAdmin, adminController
 // Dashboard + production report
 adminRouter.get('/dashboard', requireAuth, orderController.getDashboardStats);
 adminRouter.get('/production-report', requireAuth, orderController.getProductionReport);
-
-// Payment info — public read, super-admin write
-adminRouter.get('/payment-info', adminController.getPaymentInfo);
-adminRouter.put(
-  '/payment-info',
-  requireAuth,
-  requireSuperAdmin,
-  validateBody(adminController.updatePaymentInfoBodySchema),
-  adminController.updatePaymentInfo
-);
