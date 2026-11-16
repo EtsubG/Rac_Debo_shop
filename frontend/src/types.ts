@@ -26,6 +26,13 @@ export interface ProductVariant {
   active: boolean;
 }
 
+export interface ProductVariantInput {
+  color: string;
+  hex: string;
+  sizes: string[];
+  active: boolean;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -37,6 +44,17 @@ export interface Product {
   currentOrders: number;
   variants: ProductVariant[];
   active: boolean;
+}
+
+export interface ProductInput {
+  title: string;
+  description: string;
+  price: number;
+  category: ProductCategory;
+  image: string;
+  target: number;
+  active: boolean;
+  variants: ProductVariantInput[];
 }
 
 export interface OrderItem {
