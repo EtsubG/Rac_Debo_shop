@@ -20,8 +20,7 @@ import type { Product } from '@/types';
 import { Modal } from '@/components/ui/Modal';
 import { Button, Input, Textarea } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
-import { createOrder } from '@/api';
-import { paymentInstructions } from '@/data/mockData';
+import { createOrder, getPaymentInfo } from '@/api';
 
 interface OrderModalProps {
   product: Product;
@@ -57,6 +56,23 @@ export function OrderModal({ product, onClose }: OrderModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] =
     useState<string | null>(null);
+
+  // Payment info loaded from the backend.
+  // Falls back to empty strings while loading so the UI
+  // still renders — values fill in once the fetch resolves.
+  const [paymentInfo, setPaymentInfo] = useState({
+    telebirrNumber: '',
+    cbeAccount: '',
+    accountName: 'Rotaract Club of Debo',
+  });
+
+  useEffect(() => {
+    getPaymentInfo()
+      .then((res) => setPaymentInfo(res.paymentInfo))
+      .catch(() => {
+        // Non-fatal — customer can still place the order.
+      });
+  }, []);
 
   const activeVariants = product.variants.filter(
     (v) => v.active
@@ -610,8 +626,13 @@ export function OrderModal({ product, onClose }: OrderModalProps) {
               </div>
 
               <div className="space-y-2">
-                {paymentInstructions.map(
-                  (pi) => (
+                {[
+                  { label: 'Telebirr Number', value: paymentInfo.telebirrNumber },
+                  { label: 'CBE Account',     value: paymentInfo.cbeAccount },
+                  { label: 'Account Name',    value: paymentInfo.accountName },
+                ]
+                  .filter((pi) => pi.value.trim() !== '')
+                  .map((pi) => (
                     <div
                       key={pi.label}
                       className="flex items-center justify-between bg-white border border-navy-100 rounded-xl px-4 py-3"
@@ -628,17 +649,14 @@ export function OrderModal({ product, onClose }: OrderModalProps) {
 
                       <button
                         onClick={() =>
-                          copyToClipboard(
-                            pi.value
-                          )
+                          copyToClipboard(pi.value)
                         }
                         className="text-navy-300 hover:text-brand-cranberry transition"
                       >
                         <Copy className="w-4 h-4" />
                       </button>
                     </div>
-                  )
-                )}
+                  ))}
               </div>
             </div>
 

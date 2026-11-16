@@ -4,6 +4,7 @@ import type {
   DashboardStats,
   Order,
   OrderStatus,
+  PaymentInfo,
   Product,
   ProductInput,
   ProductionReport,
@@ -413,4 +414,21 @@ export async function archiveCampaign(
       method: 'POST',
     }
   );
+}
+
+/* =========================================================
+   PAYMENT INFO
+   ========================================================= */
+
+export async function getPaymentInfo(): Promise<{ paymentInfo: PaymentInfo }> {
+  return apiRequest<{ paymentInfo: PaymentInfo }>('/admin/payment-info');
+}
+
+export async function updatePaymentInfo(
+  info: PaymentInfo
+): Promise<{ paymentInfo: PaymentInfo }> {
+  return apiRequest<{ paymentInfo: PaymentInfo }>('/admin/payment-info', {
+    method: 'PUT',
+    body: JSON.stringify(info),
+  });
 }

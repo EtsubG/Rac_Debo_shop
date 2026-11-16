@@ -68,6 +68,12 @@ export interface Campaign {
   totalSales: number;
 }
 
+export interface PaymentInfo {
+  telebirrNumber: string;
+  cbeAccount: string;
+  accountName: string;
+}
+
 export interface AdminUser {
   id: string;
   username: string;

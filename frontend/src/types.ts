@@ -81,3 +81,9 @@ export interface AdminUser {
   role: 'super' | 'admin';
   addedAt: string;
 }
+
+export interface PaymentInfo {
+  telebirrNumber: string;
+  cbeAccount: string;
+  accountName: string;
+}
