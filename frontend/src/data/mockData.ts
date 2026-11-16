@@ -272,7 +272,7 @@ export const statusOrder: OrderStatus[] = [
 ];
 
 export const paymentInstructions = [
-  { label: 'Telebirr Number', value: '0911 23 45 67' },
-  { label: 'CBE Account', value: '1000 2045 6789' },
-  { label: 'Account Name', value: 'Rotaract Club of Debo' },
+  { label: 'Telebirr Number:Surafel', value: '0965178308' },
+  { label: 'CBE Account', value: '1000221376955' },
+  { label: 'Account Name', value: 'Kirubel Degemu' },
 ];
